@@ -43,21 +43,89 @@ DeepSeek Harness 插件：接入 SmartLib 学术检索平台，提供**中英文
 
 > 作者比对做了格式兼容：SmartLib 全球库作者字段是**缩写在前**的西文写法（`S. Band, Shahab`），中文库是 `周圣荃;李以科`，引文侧又常见 `Band, S. S.`。因此不比姓氏而比**有效词元集合**（忽略顺序、分隔符与单字母缩写），避免把同一作者误判为不同人。
 
-## 配置
+## 快速开始 / Quickstart
 
-> ⚠️ **仓库内的 `cordis.patch.yml` 只含空占位值**，真实网关密钥与邮箱**不提交进仓库**。
-> 请在自己的 profile 层配置（该文件不在仓库内）：
+只要有 SmartLib 网关地址与密钥即可开工。**两者都从官方技能包获取**，无需向作者单独申请：
+
+- 技能页面：<https://skillhub.cn/skills/user_164f4c1f/smartlib-citation-checker>
+- 技能包直链：`https://api.skillhub.cn/api/v1/download?slug=@user_164f4c1f/smartlib-citation-checker`
+- 安装规范：<https://skillhub.cn/install/skillhub.md>
+
+包内 `config.json` 长这样（`SMARTLIB_GATEWAY_URL` / `SMARTLIB_GATEWAY_SECRET` 就是要填的值）：
+
+```json
+{
+  "SMARTLIB_GATEWAY_URL": "https://<gateway-host>",
+  "SMARTLIB_GATEWAY_SECRET": "sk-<gateway-secret>",
+  "SMARTLIB_EMAIL": null,
+  "SMARTLIB_APPID": null,
+  "SMARTLIB_APPSECRET": null
+}
+```
+
+### 🤖 交给 Agent 一键配置
+
+把下面这整段直接发给你的 DSH Agent，它会自己完成下载、取值、写配置与验证：
+
+````text
+请帮我配置 dsh-smartlib 插件（它已经是装好的，只需填配置）：
+
+1. 下载并解压官方 SmartLib 技能包到一个临时目录：
+     https://api.skillhub.cn/api/v1/download?slug=@user_164f4c1f/smartlib-citation-checker
+   （技能页：https://skillhub.cn/skills/user_164f4c1f/smartlib-citation-checker ）
+
+2. 读取解压目录里的 config.json，取出这两个值：
+     SMARTLIB_GATEWAY_URL      → gateway_url
+     SMARTLIB_GATEWAY_SECRET   → gateway_secret
+
+3. 先问我要用于注册的邮箱（不要用 config.json 里的 SMARTLIB_EMAIL，它是 null；
+   也不要自作主张编一个邮箱——SmartLib 按邮箱计配额，必须是我本人的）。
+   拿到邮箱后，把它写到 $DSH_HOME/profiles/<当前 profile>/cordis.patch.yml：
+
+     - id: dsh-smartlib
+       config:
+         gateway_url: <上一步的 SMARTLIB_GATEWAY_URL>
+         gateway_secret: <上一步的 SMARTLIB_GATEWAY_SECRET>
+         emails:
+           - <我的邮箱>
+         batch_size: 8
+
+   注意：仓库/插件自带的 cordis.patch.yml 里是空占位值，不要改那个文件，
+   真实凭证只写在 profile 层（该文件不在仓库内，不会被提交）。
+
+4. 运行 `dsh --profile <当前 profile> --dump-config` 确认组合结果里
+   dsh-smartlib 的 gateway_url 已经是真实地址（该命令只打印配置，不会启动服务）。
+
+5. 告诉我结果，并提醒我重启 `dsh web` 让插件加载新配置。
+
+6. 最后删掉临时目录与下载的 zip。
+````
+
+### 手动配置（等价）
 
 ```yaml
 # $DSH_HOME/profiles/<profile>/cordis.patch.yml
 - id: dsh-smartlib
   config:
-    gateway_url: https://<your-gateway-host>   # 网关地址
-    gateway_secret: <your-gateway-secret>      # 网关 Bearer 密钥（仅后端使用，不会输出到对话）
-    emails:                                    # 邮箱列表，按顺序轮换仍有额度的邮箱
-      - you@example.com
-    batch_size: 8                              # 核查时的并行条数（1-16，默认 8）
+    gateway_url: https://<gateway-host>        # config.json 里的 SMARTLIB_GATEWAY_URL
+    gateway_secret: sk-<gateway-secret>        # config.json 里的 SMARTLIB_GATEWAY_SECRET
+    emails:
+      - you@example.com                        # 你自己的邮箱，用于注册与配额
+    batch_size: 8
 ```
+
+然后重启 `dsh web`。首次调用任一工具时会自动用该邮箱注册（免费 100 次检索 + 10 次下载/月，无需验证码），
+可用 `smartlib_quota` 查看额度。
+
+> ⚠️ 关于凭证的性质：`config.json` 里的密钥是**服务方随技能包公开分发**的技能凭证；
+> 配额按**注册邮箱**计算，所以用的是你自己的额度。该服务为第三方运营，
+> 其技能明确注明「**商用 API 需授权**」——本项目的 GPL 授权与之无关，商用请自行联系服务方。
+
+
+## 配置
+
+> ⚠️ **仓库内的 `cordis.patch.yml` 只含空占位值**，真实网关密钥与邮箱**不提交进仓库**。
+> 真实凭证写在 profile 层（该文件不在仓库内），写法见上方 Quickstart。
 
 插件自带的 bundle patch 负责**挂载**，profile 层负责**配置**——同 id 覆盖由 DSH loader 保证。
 可用 `dsh --profile web --dump-config` 查看组合结果（该命令只打印配置、不启动服务）。
@@ -66,9 +134,9 @@ DeepSeek Harness 插件：接入 SmartLib 学术检索平台，提供**中英文
 
 | 字段 | 必填 | 说明 |
 | --- | --- | --- |
-| `gateway_url` | ✅ | SmartLib 网关地址 |
-| `gateway_secret` | ✅ | 网关 Bearer 密钥 |
-| `emails` | ✅ | 邮箱列表，按顺序轮换仍有额度的邮箱 |
+| `gateway_url` | ✅ | SmartLib 网关地址（取自技能包 `config.json` 的 `SMARTLIB_GATEWAY_URL`） |
+| `gateway_secret` | ✅ | 网关 Bearer 密钥（取自 `SMARTLIB_GATEWAY_SECRET`；仅后端使用，不会输出到对话） |
+| `emails` | ✅ | 邮箱列表，按顺序轮换仍有额度的邮箱；**必须是使用者本人的邮箱**（配额按邮箱计） |
 | `batch_size` | — | 核查并行条数，1-16，默认 8 |
 
 未配置时各工具返回「未配置网关（gateway_url / gateway_secret）」，不会抛异常。
