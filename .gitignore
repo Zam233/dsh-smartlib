@@ -1,0 +1,24 @@
+# 依赖与构建产物
+node_modules/
+dist/
+
+# 本地开发/测试临时物
+_skillref/
+*.log
+
+# ⚠️ 含真实网关密钥与邮箱的本地配置，绝不提交
+cordis.patch.local.yml
+*.local.yml
+
+# 备份（例如改配置前的 *.bak-before-*）
+*.bak
+*.bak-*
+*.orig
+*.rej
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

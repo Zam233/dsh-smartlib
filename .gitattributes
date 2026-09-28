@@ -1,0 +1,8 @@
+# 统一以 LF 存入仓库，避免 Windows/Linux 之间的换行符抖动
+* text=auto eol=lf
+
+# 二进制文件不做转换
+*.png binary
+*.jpg binary
+*.pdf binary
+*.zip binary

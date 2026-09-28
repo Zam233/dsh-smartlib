@@ -1,0 +1,59 @@
+{
+  "name": "dsh-smartlib",
+  "description": "SmartLib 学术工具族：中文期刊+12.28亿全球文献检索、文献详情、中文期刊全文下载、配额查询、参考文献真实性核查（防 AI 幻觉），多邮箱配额轮换",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "author": "Zam233",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zam233/dsh-smartlib.git"
+  },
+  "homepage": "https://github.com/Zam233/dsh-smartlib#readme",
+  "bugs": {
+    "url": "https://github.com/Zam233/dsh-smartlib/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "smartlib",
+    "academic-search",
+    "citation-check",
+    "literature"
+  ],
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "files": [
+    "lib",
+    "tools",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "scripts": {
+    "test": "node tools/selftest.mjs",
+    "test:live": "node tools/selftest.mjs --live",
+    "test:register": "node tools/register-test.mjs"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "*",
+    "@deepseek-ai/schemastery": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-tools": {
+      "optional": true
+    },
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    }
+  }
+}

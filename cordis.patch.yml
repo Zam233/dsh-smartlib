@@ -1,0 +1,30 @@
+# dsh-smartlib bundle patch — mounts the SmartLib academic tool suite.
+# `dsh plugin --profile <name> add dsh-smartlib` reconciles this bundle into
+# the profile's `dsh.profile.bundles` stack; the profile boot merges this
+# patch (a single `insert` of the plugin row) with its config.
+#
+# 提供的工具：smartlib_search（检索）/ smartlib_detail（详情）/
+# smartlib_download（中文期刊全文）/ smartlib_quota（配额）/
+# smartlib_verify_citations（参考文献真实性核查）。
+#
+# ⚠️ 本文件在仓库中只保留空占位值，**不要在此提交真实网关密钥与邮箱**。
+#    部署时请在自己的 profile 层用同一个 id 覆盖（该文件不在仓库内）：
+#
+#      # $DSH_HOME/profiles/<name>/cordis.patch.yml
+#      - id: dsh-smartlib
+#        config:
+#          gateway_url: https://<your-gateway-host>
+#          gateway_secret: <your-gateway-secret>
+#          emails:
+#            - you@example.com
+#
+#    未配置时工具会返回「未配置网关（gateway_url / gateway_secret）」。
+- insert:
+    - id: dsh-smartlib
+      name: dsh-smartlib
+      config:
+        gateway_url: ''
+        gateway_secret: ''
+        emails: []
+        # 参考文献核查的并行条数（1-16，默认 8）
+        batch_size: 8
